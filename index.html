@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.min.css">
+	<title>Appointments</title>
+</head>
+
+<body>
+
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+					aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container theme-showcase" role="main">
+		<div class="jumbotron">
+			<div class="row">
+				<div class="page-header">
+					<h1>Appointments</h1>
+				</div>
+				<p>
+					<button type="button" id="new_it" class="btn btn-lg btn-default">New</button>
+				</p>
+			</div>
+			</br>
+
+			<div id="new_form">
+
+				<form class="form-signin" action="backend.cgi" method="POST">
+					<label for="datepicker">Date: </label>
+					<input type="text" id="datepicker" class="form-control" name="date"></br>
+					</br>
+					<label for="timepicker">Time: </label>
+					<input type="text" id="timepicker" class="form-control" name="time"></br>
+					</br>
+					<label for="descset">Description: </label>
+					<input type="text" name="description" class="form-control"></br>
+					</br>
+
+					<input type="submit" class="btn btn-success" value="Add">
+					<button type="button" id="cancel_it" class="btn btn-danger">Cancel</button>
+					</br>
+					</br>
+				</form>
+
+			</div>
+			<input type="text" id="search">
+			<button type="button" class="btn btn-info" id="search_it">Search</button>
+			</br>
+			</br>
+			<table id="table" class="table table-striped" cellspacing="10">
+				<thead>
+					<tr>
+						<th>Date</th>
+						<th>Time</th>
+						<th>Description</th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+
+	</div>
+	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function getAppointments() {
+			var json;
+			$.ajax({
+				'type': 'GET',
+				'url': 'backend.cgi',
+				'async': true,
+				'success': function (data) {
+					var json = JSON.parse(data);
+					for (var i = 0; i < json.data.length; i++) {
+						tr = $('<tr/>');
+						tr.append("<td>" + json.data[i].date + "</td>");
+						tr.append("<td>" + json.data[i].time + "</td>");
+						tr.append("<td>" + json.data[i].desc + "</td>");
+						$('table').append(tr);
+					}
+				}
+			});
+			$("#new_form").hide();
+			$("#new_it").click(function () {
+				$("#new_form").show();
+				$("#new_it").hide();
+			});
+
+			$("#cancel_it").click(function () {
+				$("#new_form").hide();
+				$("#new_it").show();
+			});
+
+
+			$(function () {
+				$("#datepicker").datepicker();
+				$("#timepicker").timepicker({});
+			});
+
+			$("#search_it").click(function () {
+				var value = $("search").val();
+				var targetTable = document.getElementById("table");
+				var colcount;
+				for (var i = 0; i < targetTable.rows.length; i++) {
+					var rowz = '';
+					if (i == 0) {
+						colcount = targetTable.rows.item(i).cells.length;
+						continue;
+					}
+
+					//Process data rows (rowIndex>=1)
+					for (var colj = 0; colj < colcount; colj++) {
+						rowz += targetTable.rows.item(i).cells.item(colj).innerText;
+					}
+
+					if (rowz.indexOf(value) == -1) {
+						targetTable.rows.item(i).style.display = 'none';
+					} else {
+						targetTable.rows.item(i).style.display = 'table-row';
+					}
+				}
+			});
+		});
+
+	</script>
+
+
+</body>
